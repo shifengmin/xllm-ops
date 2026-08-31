@@ -111,6 +111,7 @@ elif [[ "$SOC_VERSION" =~ ^(ascend)?910b ]]; then
 
     CUSTOM_OPS_ARRAY=(
         "sparse_flash_attention"
+        "sparse_flash_attention_lse"
         "moe_init_routing_custom"
         "moe_gating_top_k"
         "moe_gating_top_k_hash"
@@ -185,6 +186,7 @@ elif [[ "$SOC_VERSION" =~ ^ascend910_93 ]]; then
     
     CUSTOM_OPS_ARRAY=(
         "sparse_flash_attention"
+        "sparse_flash_attention_lse"
         "moe_init_routing_custom"
         "moe_gating_top_k"
         "moe_gating_top_k_hash"
@@ -195,8 +197,10 @@ elif [[ "$SOC_VERSION" =~ ^ascend910_93 ]]; then
         "compressor"
         "quant_lightning_indexer"  ## 已在 CANN 中内置，见 opp/built-in/op_impl/ai_core/tbe/impl/ops_transformer/ascendc/quant_lightning_indexer
         "quant_lightning_indexer_metadata"
-        "quant_lightning_indexer_v2"
-        "quant_lightning_indexer_v2_metadata"
+        # quant_lightning_indexer_v2(+metadata) from #52 is incomplete in this
+        # tree (missing attention/lightning_indexer_v2 + host log helpers) and
+        # breaks the default ascend910_93 package build. Keep sources in-tree;
+        # rebuild with -n when the depend is vendored.
         "sparse_attn_sharedkv"
         "sparse_attn_sharedkv_metadata"
         "hc_pre_sinkhorn"

@@ -10,7 +10,12 @@
 add_op_to_compiled_list()
 
 if (BUILD_OPEN_PROJECT)
-    set(quant_lightning_indexer_v2_depends attention/lightning_indexer_v2 CACHE INTERNAL "Dependencies for quant_lightning_indexer_v2")
+    # lightning_indexer_v2 is not vendored in this repo. arch22 kernels are
+    # self-contained; only declare the optional depend when the tree exists
+    # (e.g. after a future full ops-transformer migration for arch35).
+    if (EXISTS "${OPS_XLLM_DIR}/attention/lightning_indexer_v2/op_kernel")
+        set(quant_lightning_indexer_v2_depends attention/lightning_indexer_v2 CACHE INTERNAL "Dependencies for quant_lightning_indexer_v2")
+    endif()
     target_sources(op_host_aclnn PRIVATE
         quant_lightning_indexer_v2_def.cpp
     )
