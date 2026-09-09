@@ -1415,8 +1415,14 @@ ge::graphStatus SFALSETilingCheck::CheckFeatureMlaNoQuantShape() const
         OP_LOGE(opName_, "qk_head_dim[%u] should be equal to v_head_dim[%u]", qkHeadDim_, vHeadDim_),
         return ge::GRAPH_FAILED);
 
-    OP_CHECK_IF(ropeHeadDim_ != 64 && ropeHeadDim_ != 0,
-        OP_LOGE(opName_, "rope_head_dim should be 64, but got %u", ropeHeadDim_),
+    // ropeHeadDim必须与rope tensor的存在性绑定: 有rope输入时只允许64维, NoPE(无rope输入)时只允许0,
+    // 防止"tensor非空但D=0"的非法输入通过校验后进入HAS_ROPE=1的kernel按64维越界读取
+    const bool hasRope = (opParamInfo_.queryRope.tensor != nullptr);
+    OP_CHECK_IF(hasRope && ropeHeadDim_ != 64,
+        OP_LOGE(opName_, "rope_head_dim should be 64 when query_rope is provided, but got %u", ropeHeadDim_),
+        return ge::GRAPH_FAILED);
+    OP_CHECK_IF(!hasRope && ropeHeadDim_ != 0,
+        OP_LOGE(opName_, "rope_head_dim should be 0 when query_rope is not provided, but got %u", ropeHeadDim_),
         return ge::GRAPH_FAILED);
     return ge::GRAPH_SUCCESS;
 }
